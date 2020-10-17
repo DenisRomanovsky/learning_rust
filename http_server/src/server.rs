@@ -1,4 +1,7 @@
 use std::net::TcpListener;
+use crate::http::Request; // create - the root of the package
+use std::convert::TryFrom;
+use std::convert::TryInto;
 use std::io::Read; // Include inner implementation. Read is a trate
 
 
@@ -35,6 +38,7 @@ impl Server {
             let (stream, addr) = res.unwrap();
             */
 
+            //////////////////////////////////////////////////////////////////////////////////////////
 
             // match - matches result with all patterns inside an enum. Or can be used as a switch.
             // .accept() may return either OK or Err.
@@ -45,7 +49,13 @@ impl Server {
                    let mut buffer = [0; 1024]; // Array of 1024 zeros. Rust can't handle uninitialized arrays.
                    match stream.read(&mut buffer) {
                        Ok(_) => {
-                           println!("Received a request: {}", String::from_utf8_lossy(&buffer))
+                           println!("Received a request: {}", String::from_utf8_lossy(&buffer));
+
+                           // Request::try_from(&buffer as &[u8]);  Compiler expects a slice, not array.
+                           match Request::try_from(&buffer[..]) {
+                               Ok(request) => {},
+                               Err(e) => println!("Failed to parse the request: {}", e)
+                           }
                        },
                        Err(e) => println!("Failed to read from connection {}", e),
                    }
