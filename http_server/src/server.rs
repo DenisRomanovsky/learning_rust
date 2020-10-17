@@ -53,7 +53,9 @@ impl Server {
 
                            // Request::try_from(&buffer as &[u8]);  Compiler expects a slice, not array.
                            match Request::try_from(&buffer[..]) {
-                               Ok(request) => {},
+                               Ok(request) => {
+                                   dbg!(request); //Logs object to console
+                               },
                                Err(e) => println!("Failed to parse the request: {}", e)
                            }
                        },
