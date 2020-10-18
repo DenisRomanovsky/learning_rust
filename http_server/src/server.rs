@@ -1,7 +1,16 @@
 use std::net::TcpListener;
-use crate::http::{Response, StatusCode, Request}; // create - the root of the package
+use crate::http::{Response, StatusCode, Request, ParseError}; // create - the root of the package
 use std::convert::TryFrom;
 use std::io::{Read}; // Include inner implementation. Read is a trate
+
+pub trait Handler {
+    fn handle_request(&mut self, request: &Request) -> Response;
+
+    fn handle_bad_request(&mut self, e: &ParseError) -> Response{
+        println!("Failed to parse request: {}", e);
+        Response::new(StatusCode::BadRequest, None)
+    }
+}
 
 pub struct Server {
     addr: String,
@@ -16,7 +25,7 @@ impl Server {
     }
 
     // Takes ownership of the whole struct !!!
-    pub fn run(self) {
+    pub fn run(self, mut handler: impl Handler) {
         let listener = TcpListener::bind(&self.addr).unwrap();
 
         println!("Listening on {}", self.addr);
@@ -51,16 +60,9 @@ impl Server {
 
                            // Request::try_from(&buffer as &[u8]);  Compiler expects a slice, not array.
                            let response = match Request::try_from(&buffer[..]) {
-                               Ok(request) => {
-                                   dbg!(request); //Logs object to console
-                                   Response::new(
-                                       StatusCode::Ok,
-                                 Some("<h1>It's ALIIIIIVE!</h1>".to_string()))
-                               },
-                               Err(e) => {
-                                   println!("Failed to parse the request: {}", e);
-                                   Response::new(StatusCode::BadRequest, None)
-                                }
+                               Ok(request) => handler.handle_request(&request),
+                               Err(e) => handler.handle_bad_request(&e)
+                            
                            };
 
                            if let Err(e) = response.send(&mut stream){

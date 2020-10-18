@@ -1,6 +1,9 @@
 mod http;
 mod server; 
+mod website_handler;
+
 use server::Server;
+use website_handler::WebsiteHandler;
 
 fn main() {
     // let server = Server::new("127.0.0.1:8080"); // Will not work
@@ -11,5 +14,5 @@ fn main() {
 
     let address_string = String::from("127.0.0.1:8080");
     let server = Server::new(address_string);
-    server.run();
+    server.run(WebsiteHandler);
 }

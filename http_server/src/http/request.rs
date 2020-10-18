@@ -16,6 +16,20 @@ pub struct Request<'buf> {
     method: Method,
 }
 
+impl<'buf> Request<'buf> {
+    pub fn path(&self) -> &str{
+        &self.path
+    }
+
+    pub fn method(&self) -> &Method{
+        &self.method
+    }
+
+    pub fn query_string(&self) -> Option<&QueryString>{
+        self.query_string.as_ref() // Instead of returning reference to an option, we return Option with refernce to the value.
+    }
+}
+
 /*
 Possible, but not Rust-idiomatic. 
 impl Request{
