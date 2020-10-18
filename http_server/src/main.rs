@@ -4,6 +4,7 @@ mod website_handler;
 
 use server::Server;
 use website_handler::WebsiteHandler;
+use std::env;
 
 fn main() {
     // let server = Server::new("127.0.0.1:8080"); // Will not work
@@ -14,5 +15,12 @@ fn main() {
 
     let address_string = String::from("127.0.0.1:8080");
     let server = Server::new(address_string);
-    server.run(WebsiteHandler);
+
+    let default_path = format!("{}/public", env!("CARGO_MANIFEST_DIR"));
+    let public_path = env::var("PUBLIC_PATH").unwrap_or(default_path);
+
+    println!("Public path: {}", public_path);
+    server.run(WebsiteHandler::new(public_path));
+
+     // to run the code with ENV variable: PUBLIC_PATH=$(pwd)/public cargo run
 }
