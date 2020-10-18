@@ -1,9 +1,7 @@
 use std::net::TcpListener;
-use crate::http::Request; // create - the root of the package
+use crate::http::{Response, StatusCode, Request}; // create - the root of the package
 use std::convert::TryFrom;
-use std::convert::TryInto;
-use std::io::Read; // Include inner implementation. Read is a trate
-
+use std::io::{Read}; // Include inner implementation. Read is a trate
 
 pub struct Server {
     addr: String,
@@ -52,11 +50,21 @@ impl Server {
                            println!("Received a request: {}", String::from_utf8_lossy(&buffer));
 
                            // Request::try_from(&buffer as &[u8]);  Compiler expects a slice, not array.
-                           match Request::try_from(&buffer[..]) {
+                           let response = match Request::try_from(&buffer[..]) {
                                Ok(request) => {
                                    dbg!(request); //Logs object to console
+                                   Response::new(
+                                       StatusCode::Ok,
+                                 Some("<h1>It's ALIIIIIVE!</h1>".to_string()))
                                },
-                               Err(e) => println!("Failed to parse the request: {}", e)
+                               Err(e) => {
+                                   println!("Failed to parse the request: {}", e);
+                                   Response::new(StatusCode::BadRequest, None)
+                                }
+                           };
+
+                           if let Err(e) = response.send(&mut stream){
+                               println!("failed to send reponse {}", e);
                            }
                        },
                        Err(e) => println!("Failed to read from connection {}", e),
